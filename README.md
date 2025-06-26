@@ -1,85 +1,146 @@
-# 🏠 Housing Price Prediction using Linear Regression
+# 🚢 Titanic Data Preprocessing and Outlier Removal
 
-This project uses a **Linear Regression model** to predict house prices based on features like area and location. The process includes data preprocessing, model training, evaluation, and visualization.
+This project demonstrates basic data preprocessing on the **Titanic dataset** using Python and Pandas in Google Colab.
 
 ---
 
 ## 📁 Dataset
 
-- Input File: `task 3.csv`
-- Target column: `price`
+We use the Titanic dataset containing passenger information such as **age**, **fare**, **gender**, **class**, etc.
 
 ---
 
-## 🧪 Complete Code
+## 🛠️ Tasks Performed
+
+### 1. 🔍 Import Dataset & Basic Info
+
+- Load the CSV file using `pandas`.
+- Check the first few rows using `df.head()`.
+- View data types and null values using `df.info()` and `df.isnull().sum()`.
 
 ```python
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# 1. Import and preprocess the dataset
-df = pd.read_csv("/content/task 3.csv")
-df_encoded = pd.get_dummies(df, drop_first=True)
-
-# 2. Split data into train-test sets
-X = df_encoded.drop("price", axis=1)
-y = df_encoded["price"]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# 3. Fit a Linear Regression model
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-# 4. Evaluate the model
-y_pred = model.predict(X_test)
-mae = mean_absolute_error(y_test, y_pred)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-
-print("Mean Absolute Error (MAE):", mae)
-print("Mean Squared Error (MSE):", mse)
-print("R-squared (R²):", r2)
-
-# 5. Plot regression line for 'area' and interpret coefficients
-plt.figure(figsize=(8, 6))
-sns.regplot(x=X_test["area"], y=y_test, label='Actual', scatter_kws={'alpha':0.5})
-sns.lineplot(x=X_test["area"], y=model.predict(X_test), color='red', label='Predicted')
-plt.title("Regression Line: Area vs Price")
-plt.xlabel("Area")
-plt.ylabel("Price")
-plt.legend()
-plt.tight_layout()
-plt.show()
-
-# Print model coefficients
-coefficients = pd.Series(model.coef_, index=X.columns)
-print("\nIntercept:", model.intercept_)
-print("\nCoefficients:")
-print(coefficients.sort_values(ascending=False))
+df = pd.read_csv('/content/Titanic-Dataset.csv')
+print(df.head())
+print(df.info())
+print(df.isnull().sum())
 ```
 
 ---
 
-## 📊 Evaluation Metrics
+### 2. 🧼 Handle Missing Values
 
-- **MAE** – Mean Absolute Error
-- **MSE** – Mean Squared Error
-- **R²** – Coefficient of determination
+- Fill missing **numerical** values (`Age`) using **mean**.
+- Fill missing **categorical** values (`Embarked`) using **mode**.
 
----
-
-## 📈 Output
-
-- Console output of evaluation metrics
-- Graph showing actual vs predicted prices (based on area)
-- Model intercept and feature coefficients
+```python
+df['Age'].fillna(df['Age'].mean(), inplace=True)
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+```
 
 ---
 
-## 💡 Conclusion
+### 3. 🔢 Encode Categorical Features
 
-This project demonstrates a simple and effective way to predict housing prices using Linear Regression. You can further improve the model with feature engineering, polynomial terms, or advanced regressors like Random Forest.
+Convert categorical columns to numerical using **Label Encoding**.
+
+```python
+from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+df['Sex'] = le.fit_transform(df['Sex'])            # male=1, female=0
+df['Embarked'] = le.fit_transform(df['Embarked'])  # C=0, Q=1, S=2 (may vary)
+```
+
+---
+
+### 4. 📐 Standardize Numerical Features
+
+Standardize **Age** and **Fare** so they are on the same scale using `StandardScaler`.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+df[['Age', 'Fare']] = scaler.fit_transform(df[['Age', 'Fare']])
+print("\n📐 Standardized 'Age' and 'Fare':\n", df[['Age', 'Fare']].head())
+```
+
+ℹ️ **Standardization Formula**:  
+*z = (x - μ) / σ*  
+This ensures the values have **mean = 0** and **standard deviation = 1**.
+
+---
+
+### 5. 📊 Visualize & Remove Outliers (IQR Method)
+
+Use **Interquartile Range (IQR)** method to detect and remove outliers from `Age` and `Fare`.
+
+```python
+for col in ['Age', 'Fare']:
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+    IQR = Q3 - Q1
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+    df = df[(df[col] >= lower) & (df[col] <= upper)]
+
+print("\n✅ Dataset shape after removing outliers:", df.shape)
+```
+
+🧹 This removes values that are too high or too low compared to the normal range.
+
+---
+
+## ✅ Final Output
+
+After preprocessing is complete:
+
+```python
+print(df.shape)
+```
+
+Displays the new shape of the dataset after cleaning and outlier removal.
+
+---
+
+## 💡 Summary of Preprocessing Steps
+
+| Step               | Description                                      |
+|--------------------|--------------------------------------------------|
+| 1. Import          | Load and explore the Titanic dataset             |
+| 2. Missing Values  | Fill missing Age with mean, Embarked with mode   |
+| 3. Encoding        | Convert text (categorical) columns to numbers    |
+| 4. Standardization | Scale Age and Fare using StandardScaler          |
+| 5. Outliers        | Remove extreme values using IQR method           |
+
+---
+
+## 👩‍💻 Tools Used
+
+- Python  
+- Pandas  
+- Scikit-learn  
+- Google Colab
+
+---
+
+## 📎 Notes
+
+This preprocessing prepares the dataset for:
+
+- 🚀 Machine Learning models  
+- 📊 Exploratory Data Analysis (EDA)  
+- 🤖 Classification tasks like survival prediction
+
+---
+
+## 📌 Sample Output Preview
+
+```text
+✅ Dataset shape after removing outliers: (XXX, YYY)
+```
+
+Replace `XXX` and `YYY` with your actual dataset shape after preprocessing.
+
