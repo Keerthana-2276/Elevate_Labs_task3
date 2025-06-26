@@ -60,3 +60,26 @@ coefficients = pd.Series(model.coef_, index=X.columns)
 print("\nIntercept:", model.intercept_)
 print("\nCoefficients:")
 print(coefficients.sort_values(ascending=False))
+```
+
+---
+
+## 📊 Evaluation Metrics
+
+- **MAE** – Mean Absolute Error
+- **MSE** – Mean Squared Error
+- **R²** – Coefficient of determination
+
+---
+
+## 📈 Output
+
+- Console output of evaluation metrics
+- Graph showing actual vs predicted prices (based on area)
+- Model intercept and feature coefficients
+
+---
+
+## 💡 Conclusion
+
+This project demonstrates a simple and effective way to predict housing prices using Linear Regression. You can further improve the model with feature engineering, polynomial terms, or advanced regressors like Random Forest.
